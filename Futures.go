@@ -102,7 +102,7 @@ func main() {
 	inp_list1 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	inp_list2 := []int{14, 15, 16, 17, 18, 19, 20}
 	exec := Executor{}
-	//starting two go routines from executor
+	//submitting 2 set of func and inputs from executor and receiving future object
 	future1 := exec.submit(pow_3, inp_list1)
 	future2 := exec.submit(pow_2, inp_list2)
 	//checking running status of future1 and future2
