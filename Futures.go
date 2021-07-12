@@ -106,7 +106,7 @@ func main() {
 	future1 := exec.submit(pow_3, inp_list1)
 	future2 := exec.submit(pow_2, inp_list2)
 	//checking running status of future1 and future2
-	fmt.Printf("check running future1: %t, future2: %t", future1.running(), future2.running())
+	fmt.Printf("check running future1: %t, future2: %t\n", future1.running(), future2.running())
 	for i := 0; i < 10; i++ {
 		if future1.running() {
 			//get result if future1 is running
