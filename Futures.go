@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
@@ -41,28 +42,25 @@ func gofunc(f func(int) string, input []int, fut *Future) {
 }
 
 //get result from future object (timeout in millisecond)
-func (fut *Future) result(timeout_ms int) string {
+func (fut *Future) result(timeout_ms int) (string, error) {
 	timeout := time.After(time.Millisecond * time.Duration(timeout_ms))
-	for {
-		if fut.running() {
-			select {
-			case s := <-fut.resultChannel:
-				return s
-			case <-timeout:
-				panic("Timeout Error")
-			}
-
-		} else {
-			//goroutines asleep error if execution stopped
-			return <-fut.resultChannel
+	for fut.running() {
+		select {
+		case s := <-fut.resultChannel:
+			return s, nil
+		case <-timeout:
+			return "", errors.New("timeout error")
 		}
 	}
+	//goroutines asleep error if execution stopped
+	//return <-fut.resultChannel
+	return "", errors.New("all go routines asleep")
 }
 
 //stop the go routine if not stopped
 //return false if already stopped
 func (fut *Future) cancel() bool {
-	if fut.done() {
+	if fut.channelStopped {
 		return false
 	}
 	fut.stopChannel <- true
@@ -110,11 +108,13 @@ func main() {
 	for i := 0; i < 10; i++ {
 		if future1.running() {
 			//get result if future1 is running
-			fmt.Println(future1.result(700))
+			res, _ := future1.result(700)
+			fmt.Println(res)
 		}
 		if future2.running() {
 			//get result if future2 is running
-			fmt.Println(exec.Futures[1].result(700))
+			res, _ := exec.Futures[1].result(700)
+			fmt.Println(res)
 		}
 		if i == 5 {
 			fmt.Println("cancelling future1:", future1.cancel())
